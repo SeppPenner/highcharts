@@ -156,10 +156,27 @@ declare global {
         function arrayMax(data: Array<any>): number;
         function arrayMin(data: Array<any>): number;
         function attr(
+            elem: (HTMLDOMElement|SVGDOMElement)
+        ): undefined;
+        function attr(
+            elem: (HTMLDOMElement|SVGDOMElement),
+            prop: (HTMLAttributes|SVGAttributes)
+        ): undefined;
+        function attr(
+            elem: (HTMLDOMElement|SVGDOMElement),
+            prop: string,
+            value?: undefined
+        ): (string|null);
+        function attr(
+            elem: (HTMLDOMElement|SVGDOMElement),
+            prop: string,
+            value: (number|string)
+        ): undefined;
+        function attr(
             elem: (HTMLDOMElement|SVGDOMElement),
             prop?: (string|HTMLAttributes|SVGAttributes),
             value?: (number|string)
-        ): any;
+        ): (string|null|undefined);
         function clearTimeout(id: number): void;
         function correctFloat(num: number, prec?: number): number;
         function createElement(
@@ -1427,6 +1444,23 @@ function defined<T>(obj: T): obj is NonNullable<T> {
     return typeof obj !== 'undefined' && obj !== null;
 }
 
+function attr(
+    elem: (Highcharts.HTMLDOMElement|Highcharts.SVGDOMElement)
+): undefined;
+function attr(
+    elem: (Highcharts.HTMLDOMElement|Highcharts.SVGDOMElement),
+    prop: (Highcharts.HTMLAttributes|Highcharts.SVGAttributes)
+): undefined;
+function attr(
+    elem: (Highcharts.HTMLDOMElement|Highcharts.SVGDOMElement),
+    prop: string,
+    value?: undefined
+): (string|null);
+function attr(
+    elem: (Highcharts.HTMLDOMElement|Highcharts.SVGDOMElement),
+    prop: string,
+    value: (number|string)
+): undefined;
 /**
  * Set or get an attribute or an object of attributes. To use as a setter, pass
  * a key and a value, or let the second argument be a collection of keys and
@@ -1443,25 +1477,25 @@ function defined<T>(obj: T): obj is NonNullable<T> {
  * @param {number|string} [value]
  *        The value if a single property is set.
  *
- * @return {*}
+ * @return {string|null|undefined}
  *         When used as a getter, return the value.
  */
-H.attr = function (
+function attr(
     elem: (Highcharts.HTMLDOMElement|Highcharts.SVGDOMElement),
     prop?: (string|Highcharts.HTMLAttributes|Highcharts.SVGAttributes),
     value?: (number|string)
-): any {
+): (string|null|undefined) {
     var ret;
 
     // if the prop is a string
     if (isString(prop)) {
         // set the value
         if (defined(value)) {
-            elem.setAttribute(prop as string, value as string);
+            elem.setAttribute(prop, value as string);
 
         // get the value
         } else if (elem && elem.getAttribute) {
-            ret = elem.getAttribute(prop as string);
+            ret = elem.getAttribute(prop);
 
             // IE7 and below cannot get class through getAttribute (#7850)
             if (!ret && prop === 'class') {
@@ -1476,7 +1510,7 @@ H.attr = function (
         });
     }
     return ret;
-};
+}
 
 /**
  * Check if an element is an array, and if not, make it into an array.
@@ -3295,13 +3329,14 @@ if ((win as any).jQuery) {
 
             // When called without parameters or with the return argument,
             // return an existing chart
-            return charts[H.attr(this[0], 'data-highcharts-chart')];
+            return charts[(attr(this[0], 'data-highcharts-chart') as any)];
         }
     };
 }
 
 // TODO use named exports when supported.
 const utils = {
+    attr,
     defined,
     erase,
     isArray,
